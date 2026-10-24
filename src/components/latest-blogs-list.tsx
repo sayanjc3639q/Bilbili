@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Clock, Calendar, ArrowRight, Loader2 } from "lucide-react";
 import type { Blog } from "@/types";
+import { cleanPreviewText } from "@/lib/text-utils";
 
 interface LatestBlogsListProps {
   initialBlogs: Blog[];
@@ -72,7 +73,7 @@ export function LatestBlogsList({ initialBlogs, initialCursor }: LatestBlogsList
 
             {blog.excerpt && (
               <p className="mt-2 text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-                {blog.excerpt}
+                {cleanPreviewText(blog.excerpt)}
               </p>
             )}
 

@@ -6,6 +6,7 @@ import { adminDb } from "../firebase/admin";
 import { verifyAdminSession, SESSION_COOKIE_NAME } from "../firebase/session";
 import { BlogFormSchema } from "../zod-schemas";
 import { rebuildTopicTreeMeta } from "./topics";
+import { cleanPreviewText } from "../text-utils";
 import type { Blog, Block, Topic } from "@/types";
 
 /**
@@ -93,7 +94,10 @@ function calculateReadingTime(blocks: Block[]): number {
 function extractExcerpt(blocks: Block[]): string {
   for (const block of blocks) {
     if (block.type === "paragraph" && block.text.trim()) {
-      return block.text.slice(0, 180).trim() + (block.text.length > 180 ? "..." : "");
+      const cleaned = cleanPreviewText(block.text);
+      if (cleaned) {
+        return cleaned.slice(0, 180).trim() + (cleaned.length > 180 ? "..." : "");
+      }
     }
   }
   return "";
@@ -128,7 +132,8 @@ export async function saveBlog(formData: unknown): Promise<{ success: boolean; b
   }
 
   const readingTime = calculateReadingTime(parsed.blocks as Block[]);
-  const excerpt = parsed.excerpt || extractExcerpt(parsed.blocks as Block[]);
+  const rawExcerpt = parsed.excerpt || extractExcerpt(parsed.blocks as Block[]);
+  const excerpt = cleanPreviewText(rawExcerpt);
   const keywords = extractKeywords(parsed.title, parsed.tags, parsed.blocks as Block[]);
 
   const now = new Date().toISOString();

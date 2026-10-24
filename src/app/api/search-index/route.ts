@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import type { Blog, SearchIndexItem, Topic } from "@/types";
+import { cleanPreviewText } from "@/lib/text-utils";
 
 export const revalidate = 3600;
 
@@ -29,7 +30,7 @@ export async function GET() {
         subtopicId: b.subtopicId,
         topicPathNames: pathNames,
         keywords: b.keywords || [],
-        excerpt: b.excerpt || "",
+        excerpt: cleanPreviewText(b.excerpt || ""),
         readingTime: b.readingTime || 2,
         publishedAt: b.publishedAt,
       });

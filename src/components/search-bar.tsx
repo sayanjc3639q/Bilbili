@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, CornerDownLeft, X } from "lucide-react";
 import { searchCompactIndex, highlightMatchSegments } from "@/lib/search";
 import type { SearchIndexItem } from "@/types";
+import { cleanPreviewText } from "@/lib/text-utils";
 
 export function SearchBar() {
   const router = useRouter();
@@ -220,7 +221,7 @@ export function SearchBar() {
                     </div>
                     {item.excerpt && (
                       <div className="text-xs text-[var(--text-secondary)] line-clamp-1 mt-0.5">
-                        {item.excerpt}
+                        {cleanPreviewText(item.excerpt)}
                       </div>
                     )}
                   </li>

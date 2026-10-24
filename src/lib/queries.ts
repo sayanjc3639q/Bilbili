@@ -1,6 +1,14 @@
 import { unstable_cache } from "next/cache";
 import { adminDb } from "./firebase/admin";
 import type { Blog, Topic, TopicNode, TopicTreeDoc } from "@/types";
+import { cleanPreviewText } from "./text-utils";
+
+function sanitizeBlog(blog: Blog): Blog {
+  if (blog.excerpt) {
+    blog.excerpt = cleanPreviewText(blog.excerpt);
+  }
+  return blog;
+}
 
 /**
  * Fallback topic tree used when Firestore meta document is being populated or during cold builds
@@ -188,7 +196,7 @@ export async function getLatestPublishedBlogs(
     const snap = await q.limit(limitCount).get();
     const blogs: Blog[] = [];
     snap.forEach((doc) => {
-      blogs.push({ id: doc.id, ...doc.data() } as Blog);
+      blogs.push(sanitizeBlog({ id: doc.id, ...doc.data() } as Blog));
     });
 
     const nextCursor =
@@ -205,7 +213,7 @@ export async function getLatestPublishedBlogs(
 
       const blogs: Blog[] = [];
       snap.forEach((doc) => {
-        blogs.push({ id: doc.id, ...doc.data() } as Blog);
+        blogs.push(sanitizeBlog({ id: doc.id, ...doc.data() } as Blog));
       });
 
       blogs.sort((a, b) => {
@@ -258,7 +266,7 @@ export async function getBlogsByTopic(
     const snap = await q.limit(limitCount).get();
     const blogs: Blog[] = [];
     snap.forEach((doc) => {
-      blogs.push({ id: doc.id, ...doc.data() } as Blog);
+      blogs.push(sanitizeBlog({ id: doc.id, ...doc.data() } as Blog));
     });
 
     const nextCursor =
@@ -277,7 +285,7 @@ export async function getBlogsByTopic(
       snap.forEach((doc) => {
         const data = doc.data() as Blog;
         if (data.status === "published") {
-          blogs.push({ ...data, id: doc.id });
+          blogs.push(sanitizeBlog({ ...data, id: doc.id }));
         }
       });
 
@@ -352,7 +360,7 @@ export async function getBlogBySlug(slug: string): Promise<Blog | null> {
       }
     }
 
-    return { ...data, id: doc.id };
+    return sanitizeBlog({ ...data, id: doc.id });
   } catch {
     return null;
   }

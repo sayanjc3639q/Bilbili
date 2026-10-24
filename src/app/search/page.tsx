@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Search, Clock, Calendar, ArrowRight, BookOpen } from "lucide-react";
 import { searchCompactIndex, highlightMatchSegments } from "@/lib/search";
 import type { SearchIndexItem } from "@/types";
+import { cleanPreviewText } from "@/lib/text-utils";
 
 export default function SearchPage() {
   return (
@@ -110,7 +111,7 @@ function SearchContent() {
 
               {item.excerpt && (
                 <p className="mt-2 text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-                  {highlightMatchSegments(item.excerpt, query).map((seg, i) => (
+                  {highlightMatchSegments(cleanPreviewText(item.excerpt), query).map((seg, i) => (
                     <span
                       key={i}
                       className={
