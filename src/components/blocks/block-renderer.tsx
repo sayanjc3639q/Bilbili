@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Link2, AlertCircle, Info } from "lucide-react";
 import type { Block } from "@/types";
+import { FormattedText } from "./formatted-text";
 
 // Dynamic imports for heavy components
 const DynamicEquationBlock = dynamic(
@@ -45,7 +46,7 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 id={anchorId}
                 className="group flex items-center gap-2 pt-6 pb-2 text-2xl font-bold tracking-tight text-[var(--text-primary)] border-b border-[var(--border-color)] mt-8 first:mt-0"
               >
-                <span>{block.text}</span>
+                <span><FormattedText text={block.text} /></span>
                 <Link
                   href={`#${anchorId}`}
                   className="opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-opacity p-1"
@@ -61,9 +62,9 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
             return (
               <p
                 key={block.id}
-                className="text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)] font-normal"
+                className="text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)] font-normal whitespace-pre-line"
               >
-                {block.text}
+                <FormattedText text={block.text} />
               </p>
             );
 
@@ -74,7 +75,9 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 className="my-3 pl-6 list-disc space-y-2 text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)]"
               >
                 {block.items.map((item, idx) => (
-                  <li key={idx}>{item}</li>
+                  <li key={idx}>
+                    <FormattedText text={item} />
+                  </li>
                 ))}
               </ul>
             );
@@ -86,7 +89,9 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 className="my-3 pl-6 list-decimal space-y-2 text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)]"
               >
                 {block.items.map((item, idx) => (
-                  <li key={idx}>{item}</li>
+                  <li key={idx}>
+                    <FormattedText text={item} />
+                  </li>
                 ))}
               </ol>
             );
@@ -106,7 +111,7 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                             key={cIdx}
                             className="p-3 font-semibold text-[var(--text-primary)] border-r last:border-r-0 border-[var(--border-color)]"
                           >
-                            {cell}
+                            <FormattedText text={cell} />
                           </th>
                         ))}
                       </tr>
@@ -123,7 +128,7 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                             key={cIdx}
                             className="p-3 text-[var(--text-primary)] border-r last:border-r-0 border-[var(--border-color)]"
                           >
-                            {cell}
+                            <FormattedText text={cell} />
                           </td>
                         ))}
                       </tr>
@@ -151,7 +156,7 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 </div>
                 {block.caption && (
                   <figcaption className="text-center text-xs text-[var(--text-secondary)] mt-2 italic">
-                    {block.caption}
+                    <FormattedText text={block.caption} />
                   </figcaption>
                 )}
               </figure>
@@ -188,8 +193,14 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                     <Info className="w-5 h-5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
                   )}
                   <div className="flex-1 space-y-1">
-                    {block.title && <div className="font-semibold text-sm">{block.title}</div>}
-                    <div className="text-sm leading-relaxed">{block.text}</div>
+                    {block.title && (
+                      <div className="font-semibold text-sm">
+                        <FormattedText text={block.title} />
+                      </div>
+                    )}
+                    <div className="text-sm leading-relaxed whitespace-pre-line">
+                      <FormattedText text={block.text} />
+                    </div>
                   </div>
                 </div>
               </div>

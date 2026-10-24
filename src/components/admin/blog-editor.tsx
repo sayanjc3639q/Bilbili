@@ -601,10 +601,16 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
 
           {/* Block Editor Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[var(--border-color)]">
               <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
                 Content Blocks ({blocks.length})
               </h2>
+              <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5 flex-wrap">
+                <span className="font-medium">Text formatting:</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">*bold*</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">_italic_</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">`code`</span>
+              </div>
             </div>
 
             {/* Blocks List */}
