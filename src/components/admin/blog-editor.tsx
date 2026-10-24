@@ -53,7 +53,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
           {
             id: `p_${Date.now()}`,
             type: "paragraph",
-            text: "Start writing your educational article content here...",
+            text: "",
           },
         ]
   );
@@ -187,16 +187,16 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
 
     switch (type) {
       case "subtitle":
-        newBlock = { id: newId, type: "subtitle", text: "New Section Subtitle" };
+        newBlock = { id: newId, type: "subtitle", text: "" };
         break;
       case "paragraph":
         newBlock = { id: newId, type: "paragraph", text: "" };
         break;
       case "bullet_list":
-        newBlock = { id: newId, type: "bullet_list", items: ["First item"] };
+        newBlock = { id: newId, type: "bullet_list", items: [""] };
         break;
       case "numbered_list":
-        newBlock = { id: newId, type: "numbered_list", items: ["First numbered step"] };
+        newBlock = { id: newId, type: "numbered_list", items: [""] };
         break;
       case "table":
         newBlock = {
@@ -204,8 +204,8 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
           type: "table",
           hasHeader: true,
           rows: [
-            ["Header 1", "Header 2", "Header 3"],
-            ["Data 1", "Data 2", "Data 3"],
+            ["", "", ""],
+            ["", "", ""],
           ],
         };
         break;
@@ -213,9 +213,9 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
         newBlock = {
           id: newId,
           type: "image",
-          url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop",
-          alt: "Technical diagram illustration",
-          caption: "Figure 1: Illustration",
+          url: "",
+          alt: "",
+          caption: "",
         };
         break;
       case "code":
@@ -223,8 +223,8 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
           id: newId,
           type: "code",
           language: "typescript",
-          code: "// Add code snippet here\nconst speedOfLight = 299792458;\nconsole.log(speedOfLight);",
-          filename: "example.ts",
+          code: "",
+          filename: "",
         };
         break;
       case "callout":
@@ -232,15 +232,15 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
           id: newId,
           type: "callout",
           kind: "note",
-          title: "Important Note",
-          text: "Highlight key foundational theorem or cautionary guidance here.",
+          title: "",
+          text: "",
         };
         break;
       case "equation":
         newBlock = {
           id: newId,
           type: "equation",
-          formula: "E = mc^2 \\quad \\text{and} \\quad \\nabla \\times \\mathbf{B} = \\mu_0 \\mathbf{J}",
+          formula: "",
           isBlock: true,
         };
         break;
@@ -688,6 +688,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                               newItems[itemIdx] = e.target.value;
                               updateBlock(index, { ...block, items: newItems });
                             }}
+                            placeholder="List item..."
                             className="flex-1 h-8 px-2.5 text-xs bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)]"
                           />
                           <button
@@ -705,7 +706,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                       <button
                         type="button"
                         onClick={() =>
-                          updateBlock(index, { ...block, items: [...block.items, "New item"] })
+                          updateBlock(index, { ...block, items: [...block.items, ""] })
                         }
                         className="text-xs text-[var(--accent)] hover:underline inline-flex items-center gap-1 mt-1"
                       >
@@ -733,7 +734,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                             type="button"
                             onClick={() => {
                               const colCount = block.rows[0]?.length || 2;
-                              const newRows = [...block.rows, new Array(colCount).fill("Cell")];
+                              const newRows = [...block.rows, new Array(colCount).fill("")];
                               updateBlock(index, { ...block, rows: newRows });
                             }}
                             className="px-2 py-1 text-xs border border-[var(--border-color)] rounded bg-[var(--bg-main)] hover:border-[var(--accent)]"
@@ -744,7 +745,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                           <button
                             type="button"
                             onClick={() => {
-                              const newRows = block.rows.map((r) => [...r, "Cell"]);
+                              const newRows = block.rows.map((r) => [...r, ""]);
                               updateBlock(index, { ...block, rows: newRows });
                             }}
                             className="px-2 py-1 text-xs border border-[var(--border-color)] rounded bg-[var(--bg-main)] hover:border-[var(--accent)]"
@@ -764,6 +765,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                                     <input
                                       type="text"
                                       value={cell}
+                                      placeholder={rIdx === 0 && block.hasHeader ? "Header" : ""}
                                       onChange={(e) => {
                                         const newRows = block.rows.map((r, ri) =>
                                           ri === rIdx
@@ -1057,7 +1059,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
               <button
                 type="button"
                 onClick={() =>
-                  setReferences([...references, { label: "Source Label", url: "https://" }])
+                  setReferences([...references, { label: "", url: "" }])
                 }
                 className="text-xs text-[var(--accent)] hover:underline inline-flex items-center gap-1"
               >
