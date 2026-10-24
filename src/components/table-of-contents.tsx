@@ -87,14 +87,23 @@ export function TableOfContents({ items }: TableOfContentsProps) {
         <nav className="text-xs space-y-2">
           {items.map((item) => {
             const isActive = activeId === item.id;
+            const indentClass =
+              item.level === 3
+                ? "pl-4 text-[11.5px]"
+                : item.level === 4
+                ? "pl-6 text-[11px]"
+                : item.level === 5
+                ? "pl-8 text-[11px]"
+                : "pl-2 font-medium";
+
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => scrollToHeading(item.id)}
-                className={`block text-left w-full truncate py-1 transition-colors border-l-2 pl-2 -ml-[17px] ${
+                className={`block text-left w-full truncate py-1 transition-colors border-l-2 -ml-[17px] ${indentClass} ${
                   isActive
-                    ? "border-[var(--accent)] text-[var(--accent)] font-medium bg-[var(--bg-surface)]"
+                    ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--bg-surface)]"
                     : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >

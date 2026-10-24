@@ -6,6 +6,10 @@ export const SubtitleBlockSchema = z.object({
   id: z.string().min(1),
   type: z.literal("subtitle"),
   text: z.string().min(1, "Subtitle text cannot be empty"),
+  level: z
+    .union([z.literal(2), z.literal(3), z.literal(4), z.literal(5)])
+    .optional()
+    .default(2),
 });
 
 export const ParagraphBlockSchema = z.object({
@@ -64,6 +68,14 @@ export const EquationBlockSchema = z.object({
   isBlock: z.boolean().default(true),
 });
 
+export const LinkBlockSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("link"),
+  url: z.string().min(1, "URL is required"),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+});
+
 export const BlockSchema = z.discriminatedUnion("type", [
   SubtitleBlockSchema,
   ParagraphBlockSchema,
@@ -74,6 +86,7 @@ export const BlockSchema = z.discriminatedUnion("type", [
   CodeBlockSchema,
   CalloutBlockSchema,
   EquationBlockSchema,
+  LinkBlockSchema,
 ]);
 
 export const ReferenceItemSchema = z.object({

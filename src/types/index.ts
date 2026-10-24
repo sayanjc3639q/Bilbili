@@ -7,7 +7,8 @@ export type BlockType =
   | 'image'
   | 'code'
   | 'callout'
-  | 'equation';
+  | 'equation'
+  | 'link';
 
 export interface BaseBlock {
   id: string;
@@ -17,6 +18,7 @@ export interface BaseBlock {
 export interface SubtitleBlock extends BaseBlock {
   type: 'subtitle';
   text: string;
+  level?: 2 | 3 | 4 | 5;
 }
 
 export interface ParagraphBlock extends BaseBlock {
@@ -67,6 +69,13 @@ export interface EquationBlock extends BaseBlock {
   isBlock: boolean;
 }
 
+export interface LinkBlock extends BaseBlock {
+  type: 'link';
+  url: string;
+  title: string;
+  description?: string;
+}
+
 export type Block =
   | SubtitleBlock
   | ParagraphBlock
@@ -76,7 +85,8 @@ export type Block =
   | ImageBlock
   | CodeBlock
   | CalloutBlock
-  | EquationBlock;
+  | EquationBlock
+  | LinkBlock;
 
 export interface ReferenceItem {
   label: string;

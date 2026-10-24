@@ -98,7 +98,7 @@ export default async function BlogPage({ params }: BlogPageProps) {
     .map((b) => ({
       id: b.id,
       text: b.text,
-      level: 2,
+      level: (b as { level?: number }).level || 2,
     }));
 
   // Resolve breadcrumbs

@@ -3,9 +3,9 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { Link2, AlertCircle, Info } from "lucide-react";
+import { Link2, AlertCircle, Info, ExternalLink } from "lucide-react";
 import type { Block } from "@/types";
-import { FormattedText } from "./formatted-text";
+import { FormattedText, parseParagraphIntoSegments } from "./formatted-text";
 
 // Dynamic imports for heavy components
 const DynamicEquationBlock = dynamic(
@@ -40,13 +40,12 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
         switch (block.type) {
           case "subtitle": {
             const anchorId = block.id;
-            return (
-              <h2
-                key={block.id}
-                id={anchorId}
-                className="group flex items-center gap-2 pt-6 pb-2 text-2xl font-bold tracking-tight text-[var(--text-primary)] border-b border-[var(--border-color)] mt-8 first:mt-0"
-              >
-                <span><FormattedText text={block.text} /></span>
+            const level = block.level || 2;
+            const content = (
+              <>
+                <span>
+                  <FormattedText text={block.text} />
+                </span>
                 <Link
                   href={`#${anchorId}`}
                   className="opacity-0 group-hover:opacity-100 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-opacity p-1"
@@ -54,19 +53,101 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 >
                   <Link2 className="w-4 h-4" />
                 </Link>
+              </>
+            );
+
+            if (level === 3) {
+              return (
+                <h3
+                  key={block.id}
+                  id={anchorId}
+                  className="group flex items-center gap-2 pt-5 pb-1.5 text-xl font-bold tracking-tight text-[var(--text-primary)] mt-6 first:mt-0"
+                >
+                  {content}
+                </h3>
+              );
+            }
+
+            if (level === 4) {
+              return (
+                <h4
+                  key={block.id}
+                  id={anchorId}
+                  className="group flex items-center gap-2 pt-4 pb-1 text-lg font-semibold tracking-tight text-[var(--text-primary)] mt-5 first:mt-0"
+                >
+                  {content}
+                </h4>
+              );
+            }
+
+            if (level === 5) {
+              return (
+                <h5
+                  key={block.id}
+                  id={anchorId}
+                  className="group flex items-center gap-2 pt-3 pb-1 text-base font-semibold tracking-tight text-[var(--text-primary)] mt-4 first:mt-0"
+                >
+                  {content}
+                </h5>
+              );
+            }
+
+            return (
+              <h2
+                key={block.id}
+                id={anchorId}
+                className="group flex items-center gap-2 pt-6 pb-2 text-2xl font-bold tracking-tight text-[var(--text-primary)] border-b border-[var(--border-color)] mt-8 first:mt-0"
+              >
+                {content}
               </h2>
             );
           }
 
-          case "paragraph":
+          case "paragraph": {
+            const segments = parseParagraphIntoSegments(block.text);
             return (
-              <p
-                key={block.id}
-                className="text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)] font-normal whitespace-pre-line"
-              >
-                <FormattedText text={block.text} />
-              </p>
+              <div key={block.id} className="space-y-3">
+                {segments.map((seg, sIdx) => {
+                  if (seg.type === "bullet_list") {
+                    return (
+                      <ul
+                        key={sIdx}
+                        className="my-3 pl-6 list-disc space-y-1.5 text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)]"
+                      >
+                        {seg.items.map((item, i) => (
+                          <li key={i}>
+                            <FormattedText text={item} />
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  if (seg.type === "numbered_list") {
+                    return (
+                      <ol
+                        key={sIdx}
+                        className="my-3 pl-6 list-decimal space-y-1.5 text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)]"
+                      >
+                        {seg.items.map((item, i) => (
+                          <li key={i}>
+                            <FormattedText text={item} />
+                          </li>
+                        ))}
+                      </ol>
+                    );
+                  }
+                  return (
+                    <p
+                      key={sIdx}
+                      className="text-base sm:text-[17.5px] leading-relaxed text-[var(--text-primary)] font-normal whitespace-pre-line"
+                    >
+                      <FormattedText text={seg.text} />
+                    </p>
+                  );
+                })}
+              </div>
             );
+          }
 
           case "bullet_list":
             return (
@@ -215,6 +296,43 @@ export function BlockRenderer({ blocks, isFirstImagePriority = true }: BlockRend
                 isBlock={block.isBlock}
               />
             );
+
+          case "link": {
+            let hostname = "External Link";
+            try {
+              const urlObj = new URL(
+                block.url.startsWith("http") ? block.url : `https://${block.url}`
+              );
+              hostname = urlObj.hostname;
+            } catch {
+              hostname = block.url;
+            }
+
+            return (
+              <a
+                key={block.id}
+                href={block.url.startsWith("http") ? block.url : `https://${block.url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="my-5 p-4 border border-[var(--border-color)] rounded bg-[var(--bg-surface)] hover:border-[var(--accent)] transition-colors flex items-start justify-between gap-4 group block no-underline"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--accent)] font-medium mb-1">
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{hostname}</span>
+                  </div>
+                  <div className="text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                    <FormattedText text={block.title} />
+                  </div>
+                  {block.description && (
+                    <div className="text-xs text-[var(--text-secondary)] mt-1.5 line-clamp-2 leading-relaxed">
+                      <FormattedText text={block.description} />
+                    </div>
+                  )}
+                </div>
+              </a>
+            );
+          }
 
           default:
             return null;

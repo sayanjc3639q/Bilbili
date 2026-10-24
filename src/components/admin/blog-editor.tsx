@@ -187,7 +187,7 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
 
     switch (type) {
       case "subtitle":
-        newBlock = { id: newId, type: "subtitle", text: "" };
+        newBlock = { id: newId, type: "subtitle", text: "", level: 2 };
         break;
       case "paragraph":
         newBlock = { id: newId, type: "paragraph", text: "" };
@@ -242,6 +242,15 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
           type: "equation",
           formula: "",
           isBlock: true,
+        };
+        break;
+      case "link":
+        newBlock = {
+          id: newId,
+          type: "link",
+          url: "",
+          title: "",
+          description: "",
         };
         break;
       default:
@@ -606,10 +615,12 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                 Content Blocks ({blocks.length})
               </h2>
               <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5 flex-wrap">
-                <span className="font-medium">Text formatting:</span>
+                <span className="font-medium">Format:</span>
                 <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">*bold*</span>
                 <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">_italic_</span>
-                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">`code`</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">- bullet</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">n- number</span>
+                <span className="px-1.5 py-0.5 rounded bg-[var(--bg-main)] border border-[var(--border-color)] font-mono text-[var(--text-primary)]">$&lt;slug&gt;&#123;text&#125;</span>
               </div>
             </div>
 
@@ -660,23 +671,66 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
 
                   {/* Individual Block Editors */}
                   {block.type === "subtitle" && (
-                    <input
-                      type="text"
-                      value={block.text}
-                      onChange={(e) => updateBlock(index, { ...block, text: e.target.value })}
-                      placeholder="Section Subtitle / Heading"
-                      className="w-full h-9 px-3 text-base font-bold bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)]"
-                    />
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                          Heading Level:
+                        </span>
+                        <div className="flex items-center gap-1 border border-[var(--border-color)] rounded p-0.5 bg-[var(--bg-main)]">
+                          {([2, 3, 4, 5] as const).map((lvl) => (
+                            <button
+                              key={lvl}
+                              type="button"
+                              onClick={() =>
+                                updateBlock(index, { ...block, level: lvl })
+                              }
+                              className={`px-2 py-0.5 text-xs font-mono rounded transition-colors ${
+                                (block.level || 2) === lvl
+                                  ? "bg-[var(--accent)] text-white font-bold"
+                                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                              }`}
+                            >
+                              H{lvl}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        value={block.text}
+                        onChange={(e) =>
+                          updateBlock(index, { ...block, text: e.target.value })
+                        }
+                        placeholder={`Heading (H${block.level || 2}) Title`}
+                        className={`w-full px-3 bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)] ${
+                          (block.level || 2) === 2
+                            ? "h-10 text-lg font-bold"
+                            : (block.level || 2) === 3
+                            ? "h-9 text-base font-bold"
+                            : "h-8 text-sm font-semibold"
+                        }`}
+                      />
+                    </div>
                   )}
 
                   {block.type === "paragraph" && (
-                    <textarea
-                      rows={4}
-                      value={block.text}
-                      onChange={(e) => updateBlock(index, { ...block, text: e.target.value })}
-                      placeholder="Write educational paragraph..."
-                      className="w-full p-3 text-sm bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)] leading-relaxed resize-y"
-                    />
+                    <div className="space-y-1.5">
+                      <textarea
+                        rows={5}
+                        value={block.text}
+                        onChange={(e) =>
+                          updateBlock(index, { ...block, text: e.target.value })
+                        }
+                        placeholder="Write paragraph... Start a new line with '- ' for bullets, 'n- ' for numbered steps, or '$<slug>{Link Text}' for internal blog links."
+                        className="w-full p-3 text-sm bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)] leading-relaxed resize-y font-normal"
+                      />
+                      <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-2 flex-wrap">
+                        <span>Syntax:</span>
+                        <span className="font-mono bg-[var(--bg-main)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">- bullet</span>
+                        <span className="font-mono bg-[var(--bg-main)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">n- numbered</span>
+                        <span className="font-mono bg-[var(--bg-main)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">$&lt;slug&gt;&#123;Title&#125;</span>
+                      </div>
+                    </div>
                   )}
 
                   {(block.type === "bullet_list" || block.type === "numbered_list") && (
@@ -962,6 +1016,55 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                       />
                     </div>
                   )}
+
+                  {block.type === "link" && (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Link Title / Label *
+                        </label>
+                        <input
+                          type="text"
+                          value={block.title}
+                          onChange={(e) =>
+                            updateBlock(index, { ...block, title: e.target.value })
+                          }
+                          placeholder="e.g. Official RFC 791 Specification / MDN Web Docs"
+                          className="w-full h-8 px-2.5 text-xs bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)] font-medium"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                            Website URL *
+                          </label>
+                          <input
+                            type="url"
+                            value={block.url}
+                            onChange={(e) =>
+                              updateBlock(index, { ...block, url: e.target.value })
+                            }
+                            placeholder="https://example.com"
+                            className="w-full h-8 px-2.5 text-xs font-mono bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                            Description (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={block.description || ""}
+                            onChange={(e) =>
+                              updateBlock(index, { ...block, description: e.target.value })
+                            }
+                            placeholder="Brief description or publisher"
+                            className="w-full h-8 px-2.5 text-xs bg-[var(--bg-main)] border border-[var(--border-color)] rounded text-[var(--text-primary)]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1051,6 +1154,15 @@ export function BlogEditor({ initialBlog }: BlogEditorProps) {
                 >
                   <Calculator className="w-3.5 h-3.5" />
                   <span>KaTeX Math</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addBlock("link")}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border-color)] rounded bg-[var(--bg-main)] text-[var(--text-primary)] hover:border-[var(--accent)]"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>External Link</span>
                 </button>
               </div>
             </div>
