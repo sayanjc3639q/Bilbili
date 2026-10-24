@@ -1,69 +1,109 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getCachedTopicTree, getLatestPublishedBlogs } from "@/lib/queries";
+import { TopicSidebar } from "@/components/topic-sidebar";
+import { LatestBlogsList } from "@/components/latest-blogs-list";
+import { Folder, ArrowRight } from "lucide-react";
 
-export default function Home() {
+export const revalidate = 3600; // 1-hour ISR or on-demand revalidation
+
+export default async function HomePage() {
+  const [tree, { blogs, nextCursor }] = await Promise.all([
+    getCachedTopicTree(),
+    getLatestPublishedBlogs(10),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+      {/* Sidebar / Mobile Drawer */}
+      <TopicSidebar tree={tree} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0">
+        {/* Hero Section */}
+        <div className="pb-8 border-b border-[var(--border-color)] mb-8">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)] mb-3">
+            Bilbili Educational Archive
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+            A structured, distraction-free educational library. Clear explanations, rigorous notes, and structured curricula across technical disciplines.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {/* Main Topics as Simple Cards */}
+        <section className="mb-12" aria-labelledby="main-topics-heading">
+          <div className="flex items-center justify-between mb-4">
+            <h2 id="main-topics-heading" className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Folder className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span>Core Fields</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {tree.map((topic) => (
+              <div
+                key={topic.id}
+                className="p-5 border border-[var(--border-color)] rounded bg-[var(--bg-surface)] hover:border-[var(--accent)] transition-colors group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                      <Link href={`/topic/${topic.slug || topic.id}`}>
+                        {topic.name}
+                      </Link>
+                    </h3>
+                    {topic.blogCount > 0 && (
+                      <span className="text-xs px-2 py-0.5 border border-[var(--border-color)] rounded bg-[var(--bg-main)] font-mono text-[var(--text-secondary)]">
+                        {topic.blogCount} {topic.blogCount === 1 ? "article" : "articles"}
+                      </span>
+                    )}
+                  </div>
+
+                  {topic.children && topic.children.length > 0 && (
+                    <div className="text-xs text-[var(--text-secondary)] space-y-1 mb-4">
+                      <div className="font-medium text-[var(--text-primary)]">Subtopics:</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {topic.children.slice(0, 4).map((c) => (
+                          <Link
+                            key={c.id}
+                            href={`/topic/${c.slug || c.id}`}
+                            className="px-2 py-0.5 bg-[var(--bg-main)] border border-[var(--border-color)] rounded hover:border-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                          >
+                            {c.name}
+                          </Link>
+                        ))}
+                        {topic.children.length > 4 && (
+                          <span className="px-1.5 py-0.5 text-[var(--text-secondary)]">
+                            +{topic.children.length - 4} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  href={`/topic/${topic.slug || topic.id}`}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent)] hover:underline mt-2"
+                >
+                  <span>Explore topic</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Latest Blogs */}
+        <section aria-labelledby="latest-articles-heading">
+          <div className="pb-3 border-b border-[var(--border-color)] mb-6 flex items-center justify-between">
+            <h2 id="latest-articles-heading" className="text-lg font-bold text-[var(--text-primary)]">
+              Latest Publications
+            </h2>
+          </div>
+
+          <LatestBlogsList initialBlogs={blogs} initialCursor={nextCursor} />
+        </section>
+      </div>
     </div>
   );
 }
